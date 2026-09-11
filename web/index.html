@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>キー設定 — sanwa-keys</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="wordmark" href="./">sanwa-keys</a>
+    <nav aria-label="関連リンク"><a href="https://github.com/daikw/sanwa-keys#readme">使い方</a><a href="https://github.com/daikw/sanwa-keys">GitHub ↗</a></nav>
+  </header>
+  <main>
+    <div class="page-heading"><h1>キー設定</h1><p>キーボード・フットペダル本体の割り当てを変更します。</p></div>
+    <section class="connection" aria-labelledby="device-title">
+      <div><h2 id="device-title">接続デバイス</h2><p id="device-name">未接続</p></div>
+      <div class="actions"><button id="connect" type="button" class="primary">デバイスを接続</button><button id="disconnect" type="button" hidden>切断</button></div>
+    </section>
+    <p id="compatibility" class="notice">デスクトップ版Chrome / Edgeで開き、USBデバイスを選択してください。</p>
+    <p id="status" role="status" aria-live="polite">接続すると現在の設定を読み出します。</p>
+    <noscript><p class="notice">設定画面を使うにはJavaScriptを有効にしてください。</p></noscript>
+    <section id="workspace" hidden aria-labelledby="keys-title">
+      <div class="section-heading"><h2 id="keys-title">キーの割り当て</h2><button id="refresh" type="button">再読み込み</button></div>
+      <p class="hint">変更する入力だけ記入してください。空欄は現在の設定を保持します。番号は本体の設定スロットです。</p>
+      <form id="editor" novalidate>
+        <div class="column-labels" aria-hidden="true"><span>入力</span><span>現在の設定</span><span>新しい設定</span></div>
+        <div id="key-rows"></div>
+        <p id="key-help" class="hint">例: <code>ctrl+shift+a</code>、<code>cmd+f13</code>、<code>enter</code>。<a href="https://github.com/daikw/sanwa-keys#key-names">使えるキー名</a></p>
+        <section class="changes" aria-labelledby="changes-title"><h3 id="changes-title">変更内容</h3><ul id="change-list"></ul><p id="no-changes">変更はありません。</p></section>
+        <div class="apply-bar"><p id="apply-help">適用前の全設定をファイルに保存してから書き込みます。</p><button id="apply" class="primary" type="submit" disabled>バックアップを保存して適用</button></div>
+      </form>
+      <section class="backup" aria-labelledby="backup-title">
+        <div><h2 id="backup-title">バックアップと復元</h2><p class="hint">CLIと共通のJSON形式です。復元ファイルを読み込んでも、適用するまでは本体を変更しません。</p></div>
+        <div class="actions"><button id="export" type="button">現在の設定を保存</button><label class="file-button">復元ファイルを選択<input id="import" type="file" accept=".json,application/json"></label><button id="reset" type="button">変更を取り消す</button></div>
+      </section>
+    </section>
+    <details class="support"><summary>対応機種・利用上の注意</summary><div>
+      <p><strong>400-MA214BK</strong>（3ペダル）/ <strong>400-SKB081</strong>（6キー）</p>
+      <p>このPCにUSB接続したデバイスを操作します。ほかのPCに接続した機器は、そのPCのブラウザで開いてください。Safari・FirefoxはWebHIDに対応していません。Linuxではhidrawへのアクセス権限が必要です。</p>
+      <p>書き込みにはファイル保存APIも必要です。保存を取り消した場合は書き込みません。CLIや他の設定ツールと同時に操作しないでください。</p>
+      <p>通信エラーや切断が起きたら、接続し直して設定を確認してください。部分的に変更された場合は保存したファイルから復元できます。</p>
+      <p>複数ステップのマクロ・照明・ファームウェア更新は対象外です。対応状況は<a href="https://github.com/daikw/sanwa-keys/blob/feat/browser-configurator/docs/browser.md">ブラウザ版の検証記録</a>をご覧ください。</p>
+    </div></details>
+  </main>
+  <footer><span>サンワサプライ・PCsensorとは独立したOSSです。</span><span>設定値はサーバーへ送信しません。</span></footer>
+</body>
+</html>

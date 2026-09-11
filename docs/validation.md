@@ -46,4 +46,8 @@ The CLI selected interface 1 of `3553:c115` and checked its descriptor. Original
 - Real-device changes were temporary, and both original configurations were restored.
 - Mouse and string replay formats are source-grounded; only keyboard records were programmed in these hardware tests.
 
-The `.go` files and module metadata used for these checks are identified in [source-sha256.txt](source-sha256.txt). CI separately checks every published commit on the configured native runners.
+The initial CLI `.go` files and module metadata used for the hardware checks above are identified by commit `dc70695` and its [source-sha256.txt](https://github.com/daikw/sanwa-keys/blob/dc70695/docs/source-sha256.txt). CI separately checks every published commit on the configured native runners.
+
+## Subsequent additions
+
+Model inference is covered by RED → GREEN tests for read/set/restore, zero or multiple matches, path disambiguation, snapshot model mismatch, and explicit offline dry-run. Independent Go race tests and vet passed. [Browser validation](browser.md) records the separate WebHID and UI evidence.
