@@ -47,13 +47,14 @@ func main() {
 const usage = `sanwa-keys: configure onboard keys on macOS and Linux
 
   list
-  read    --model MODEL [--device PATH] [--out FILE]
-  set     --model MODEL --slot N --key ctrl+shift+a --backup FILE
+  read    [--model MODEL] [--device PATH] [--out FILE]
+  set     [--model MODEL] --slot N --key ctrl+shift+a --backup FILE
   set     --model MODEL --slot N --key cmd+f13 --dry-run
-  restore --model MODEL --from FILE --backup FILE
+  restore [--model MODEL] --from FILE --backup FILE
   version
 
 Models: 400-MA214BK (3 pedals), 400-SKB081 (6 keys).
+Model is inferred when exactly one supported device matches --device, if given.
 Files contain device key records, not application settings or LED settings.
 All device commands accept --device PATH and --timeout DURATION.
 Use a new backup filename for each mutation. Writes are verified by readback.
@@ -87,7 +88,7 @@ func run(args []string, out io.Writer, b backend) error {
 	}
 	fs := flag.NewFlagSet(command, flag.ContinueOnError)
 	fs.SetOutput(out)
-	model := fs.String("model", "", "exact model name")
+	model := fs.String("model", "", "model name (inferred when one device matches)")
 	path := fs.String("device", "", "path from list")
 	// The default is the 1s response window used by the hardware validation;
 	// users can extend it for a slow USB connection.
@@ -117,6 +118,24 @@ func run(args []string, out io.Writer, b backend) error {
 		return errors.New("unexpected positional arguments")
 	}
 	*model = strings.ToUpper(*model)
+	if *model == "" {
+		infos, err := b.list()
+		if err != nil {
+			return err
+		}
+		var selected device.Info
+		matches := 0
+		for _, info := range infos {
+			if *path == "" || *path == info.Path {
+				selected = info
+				matches++
+			}
+		}
+		if matches != 1 {
+			return fmt.Errorf("cannot infer model: expected one supported device, found %d; use list, then select --device or --model", matches)
+		}
+		*model, *path = selected.Model, selected.Path
+	}
 	count, ok := slots[*model]
 	if !ok {
 		return errors.New("specify --model 400-MA214BK or 400-SKB081")

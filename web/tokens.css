@@ -1,0 +1,15 @@
+:root {
+  --color-paper: oklch(98.5% 0.004 250);
+  --color-surface: oklch(96% 0.006 250);
+  --color-ink: oklch(24% 0.02 258);
+  --color-muted: oklch(43% 0.018 257);
+  --color-rule: oklch(64% 0.014 250);
+  --color-accent: oklch(48% 0.20 256);
+  --color-accent-ink: oklch(98.5% 0.004 250);
+  --color-error: oklch(43% 0.16 25);
+  --color-focus: oklch(28% 0.05 256);
+  --color-overlay: oklch(24% 0.02 258 / .3);
+  --font-body: ui-sans-serif, system-ui, sans-serif;
+  --font-display: ui-monospace, monospace;
+  --radius-control: 6px;
+}

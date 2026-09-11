@@ -9,6 +9,12 @@ Configure the onboard key assignments of Sanwa programmable keys and foot pedals
 
 An independent project, not affiliated with Sanwa or PCsensor. Devices with different USB descriptors are rejected even if the product ID matches.
 
+## Browser configurator
+
+Open [sanwa-keys on GitHub Pages](https://daikw.github.io/sanwa-keys/) in desktop Chrome or Edge. Select the USB device, edit the desired slots, and save the backup before applying. The page rereads the saved file, verifies the device has not changed, writes only changed slots, and reads every slot back. CLI JSON snapshots can be imported for restoration.
+
+The static page uses WebHID directly and sends no configuration data to a server. Writing also requires the File System Access save picker. Safari/Firefox do not support WebHID. On Linux the browser user needs permission to access the device's hidraw interface; do not run the browser as root. See [browser support and validation](docs/browser.md).
+
 ## Build and install
 
 Requires Go 1.27.1 and a C compiler. macOS uses the Xcode Command Line Tools; Debian/Ubuntu also needs `libudev-dev`. HIDAPI is included in the pinned Go dependency, so no separate HIDAPI installation is needed.
@@ -26,7 +32,7 @@ The Go version is also pinned in `mise.toml`. Add `~/.local/bin` to your PATH if
 
 ```sh
 sanwa-keys list
-sanwa-keys read --model 400-MA214BK
+sanwa-keys read # model inferred when exactly one supported device is connected
 sanwa-keys read --model 400-SKB081 --out original.json
 
 # Preview encoded payloads without opening USB.
@@ -41,6 +47,8 @@ sanwa-keys restore --model 400-MA214BK --from before-pedal.json --backup before-
 ```
 
 Use a new backup filename for every mutation: existing files are never overwritten. Snapshot files have owner-only permissions and are flushed to disk before any programming command. `set` and `restore` return success only after all slots match the expected configuration, including unchanged slots. Reapplying an equivalent configuration does not write device memory.
+
+`--model` is optional when exactly one supported device matches. `--device PATH` can disambiguate two devices without a model name. Zero or multiple matches are rejected. An explicit model keeps `set --dry-run` usable without USB access.
 
 `--device PATH` selects the configuration interface shown by `list` when multiple devices match. All device commands accept `--timeout 1s`; this bounds each configuration response, not an entire multi-slot command.
 
@@ -73,6 +81,7 @@ Slot numbers are the device's firmware indices, starting at 1. Physical position
 ```sh
 make check  # go vet and race-enabled tests
 make build
+node --test web/*.test.mjs # browser protocol and backup logic (Node 26.8.1)
 ```
 
 Protocol, malformed-input, backup ordering, partial-write, verification, and HID framing tests use simulated USB responses. No test automatically accesses hardware. On Linux systems whose virtual address layout is unsupported by Go's race runtime, `go test -race` may abort; `go test ./...` and `go vet ./...` can still run, but do not replace a race-enabled check on a supported host.
