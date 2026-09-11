@@ -1,7 +1,7 @@
 name: Pages
 on:
   push:
-    branches: [main, feat/browser-configurator]
+    branches: [main]
     paths: ['web/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
