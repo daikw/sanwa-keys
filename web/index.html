@@ -31,7 +31,7 @@
       <form id="editor" novalidate>
         <div class="column-labels" aria-hidden="true"><span>入力</span><span>現在の設定</span><span>新しい設定</span></div>
         <div id="key-rows"></div>
-        <p id="key-help" class="hint">例: <code>ctrl+shift+a</code>、<code>cmd+f13</code>、<code>enter</code>。<a href="https://github.com/daikw/sanwa-keys#key-names">使えるキー名</a></p>
+        <p id="key-help" class="hint">例: <code>ctrl+shift+a</code>、<code>cmd+f13</code>、<code>enter</code>。<button id="show-key-help" type="button" class="text-button" aria-haspopup="dialog">使えるキー名</button></p>
         <section class="changes" aria-labelledby="changes-title"><h3 id="changes-title">変更内容</h3><ul id="change-list"></ul><p id="no-changes">変更はありません。</p></section>
         <div class="apply-bar"><p id="apply-help">適用前の全設定をファイルに保存してから書き込みます。</p><button id="apply" class="primary" type="submit" disabled>バックアップを保存して適用</button></div>
       </form>
@@ -49,5 +49,24 @@
     </div></details>
   </main>
   <footer><span>サンワサプライ・PCsensorとは独立したOSSです。</span><span>設定値はサーバーへ送信しません。</span></footer>
+  <dialog id="key-help-dialog" aria-labelledby="key-help-title">
+    <div class="section-heading"><h2 id="key-help-title">使えるキー名</h2><button id="close-key-help" type="button" autofocus>閉じる</button></div>
+    <p>修飾キーと通常キー1つを <code>+</code> でつなぎます。修飾キーだけの設定もできます。</p>
+    <p><strong>記号はキー名で指定します。</strong> たとえば <code>cmd+;</code> は <code>cmd+semicolon</code> と入力してください。</p>
+    <h3>入力例</h3>
+    <ul><li><code>cmd+semicolon</code> — Command + セミコロン</li><li><code>ctrl+shift+a</code> — Ctrl + Shift + A</li><li><code>f13</code>、<code>enter</code> — キー単独</li></ul>
+    <h3>文字・数字・ファンクションキー</h3>
+    <p><code>a</code>〜<code>z</code>、<code>0</code>〜<code>9</code>、<code>f1</code>〜<code>f24</code>。大文字・小文字は区別しません。</p>
+    <h3>修飾キー</h3>
+    <p><code>ctrl</code>、<code>shift</code>、<code>alt</code>、<code>cmd</code>。<code>super</code> と <code>win</code> は <code>cmd</code> と同じ左GUIキーです。</p>
+    <p>右側を指定する場合: <code>rctrl</code>、<code>rshift</code>、<code>ralt</code>、<code>rcmd</code>。別名: <code>lctrl</code>、<code>lshift</code>、<code>lalt</code>、<code>lmeta</code>、<code>rmeta</code>。</p>
+    <h3>記号キーの名前</h3>
+    <p class="hint">記号はUS配列での目安です。実際の文字入力はPCのキーボード配列に従います。</p>
+    <table><thead><tr><th scope="col">記号</th><th scope="col">入力する名前</th></tr></thead><tbody>
+      <tr><td>;</td><td><code>semicolon</code></td></tr><tr><td>,</td><td><code>comma</code></td></tr><tr><td>.</td><td><code>period</code></td></tr><tr><td>/</td><td><code>slash</code></td></tr><tr><td>-</td><td><code>minus</code></td></tr><tr><td>=</td><td><code>equal</code></td></tr><tr><td>[</td><td><code>leftbracket</code></td></tr><tr><td>]</td><td><code>rightbracket</code></td></tr><tr><td>&#92;</td><td><code>backslash</code></td></tr><tr><td>'</td><td><code>quote</code></td></tr><tr><td>`</td><td><code>grave</code></td></tr>
+    </tbody></table>
+    <h3>その他のキー</h3>
+    <p class="key-names"><code>enter</code> <code>escape</code>（<code>esc</code>） <code>backspace</code> <code>tab</code> <code>space</code> <code>capslock</code> <code>printscreen</code> <code>scrolllock</code> <code>pause</code> <code>insert</code> <code>home</code> <code>pageup</code> <code>delete</code> <code>end</code> <code>pagedown</code> <code>right</code> <code>left</code> <code>down</code> <code>up</code> <code>numlock</code></p>
+  </dialog>
 </body>
 </html>

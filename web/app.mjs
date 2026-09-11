@@ -145,3 +145,12 @@ if (!supported) {
   status('このブラウザでは接続できません。','error');
 }
 render();
+
+const keyHelp = $('key-help-dialog');
+$('show-key-help').addEventListener('click', () => keyHelp.showModal());
+$('close-key-help').addEventListener('click', () => keyHelp.close());
+keyHelp.addEventListener('click', event => {
+  if (event.target !== keyHelp) return;
+  const bounds = keyHelp.getBoundingClientRect();
+  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) keyHelp.close();
+});

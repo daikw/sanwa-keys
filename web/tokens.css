@@ -8,6 +8,7 @@
   --color-accent-ink: oklch(98.5% 0.004 250);
   --color-error: oklch(43% 0.16 25);
   --color-focus: oklch(28% 0.05 256);
+  --color-overlay: oklch(24% 0.02 258 / .3);
   --font-body: ui-sans-serif, system-ui, sans-serif;
   --font-display: ui-monospace, monospace;
   --radius-control: 6px;

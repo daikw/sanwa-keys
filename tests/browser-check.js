@@ -37,6 +37,16 @@ async (page) => {
   await page.getByRole('button',{name:'デバイスを接続',exact:true}).click();
   await page.getByRole('status').filter({hasText:'現在の設定を読み出しました'}).waitFor();
   const first=page.getByLabel('入力 1 の新しい設定',{exact:true});
+  await first.fill('cmd+;');
+  const help=page.getByRole('button',{name:'使えるキー名',exact:true});
+  if(await help.count()!==1)throw Error('Missing in-page key help button');
+  await help.click();
+  const dialog=page.getByRole('dialog',{name:'使えるキー名',exact:true});
+  if(!await dialog.isVisible() || !(await dialog.innerText()).includes('cmd+semicolon'))throw Error('Key help is missing symbol example');
+  await page.getByRole('button',{name:'閉じる',exact:true}).click();
+  if(await dialog.isVisible() || await first.inputValue()!=='cmd+;')throw Error('Help changed pending input');
+  await help.click(); await page.keyboard.press('Escape');
+  if(await dialog.isVisible() || !await help.evaluate(el=>document.activeElement===el))throw Error('Dialog Escape/focus restoration failed');
   await first.fill('a+b');
   if(await page.getByRole('button',{name:'バックアップを保存して適用',exact:true}).isEnabled())throw Error('invalid key accepted');
   await first.fill('f14');
