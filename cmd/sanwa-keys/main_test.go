@@ -7,8 +7,11 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/daikw/sanwa-keys/internal/device"
 )
 
 type fakeDevice struct {
@@ -16,6 +19,115 @@ type fakeDevice struct {
 	writes   int
 	backup   string
 	mismatch bool
+}
+
+func TestInferModelForDeviceCommands(t *testing.T) {
+	for _, command := range []string{"read", "set", "restore"} {
+		t.Run(command, func(t *testing.T) {
+			f, b := setup(t)
+			b.list = func() ([]device.Info, error) {
+				return []device.Info{{Model: "400-MA214BK", Path: "pedals", Slots: 3}}, nil
+			}
+			b.open = func(model, path string, _ time.Duration) (connection, error) {
+				if model != "400-MA214BK" || path != "pedals" {
+					t.Fatalf("opened wrong selection: %q %q", model, path)
+				}
+				return f, nil
+			}
+			args := []string{command}
+			switch command {
+			case "set":
+				args = append(args, "--slot", "1", "--key", "f13", "--backup", f.backup)
+			case "restore":
+				src := filepath.Join(t.TempDir(), "source.json")
+				if err := saveNew(src, makeSnapshot("400-MA214BK", f.records)); err != nil {
+					t.Fatal(err)
+				}
+				args = append(args, "--from", src, "--backup", f.backup)
+			}
+			if err := run(args, &bytes.Buffer{}, b); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestModelInferenceSelection(t *testing.T) {
+	infos := []device.Info{{Model: "400-MA214BK", Path: "pedals", Slots: 3}, {Model: "400-SKB081", Path: "keys", Slots: 6}}
+	for _, tt := range []struct {
+		name      string
+		infos     []device.Info
+		path      string
+		wantModel string
+	}{
+		{"none", nil, "", ""},
+		{"multiple", infos, "", ""},
+		{"path misses", infos, "missing", ""},
+		{"one", infos[1:], "", "400-SKB081"},
+		{"path selects", infos, "keys", "400-SKB081"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			b := backend{
+				list: func() ([]device.Info, error) { return tt.infos, nil },
+				open: func(string, string, time.Duration) (connection, error) {
+					t.Fatal("dry-run opened device")
+					return nil, nil
+				},
+			}
+			args := []string{"set", "--slot", "6", "--key", "f13", "--dry-run"}
+			if tt.path != "" {
+				args = append(args, "--device", tt.path)
+			}
+			var out bytes.Buffer
+			err := run(args, &out, b)
+			if tt.wantModel == "" {
+				if err == nil || !strings.Contains(err.Error(), "--device") || !strings.Contains(err.Error(), "--model") {
+					t.Fatalf("expected actionable selection error, got %v", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			var result struct {
+				Model string `json:"model"`
+			}
+			if err := json.Unmarshal(out.Bytes(), &result); err != nil || result.Model != tt.wantModel {
+				t.Fatalf("wrong inferred model: %s %v", out.String(), err)
+			}
+		})
+	}
+}
+
+func TestExplicitModelDryRunDoesNotEnumerate(t *testing.T) {
+	b := backend{
+		list: func() ([]device.Info, error) { t.Fatal("explicit dry-run enumerated USB"); return nil, nil },
+		open: func(string, string, time.Duration) (connection, error) {
+			t.Fatal("dry-run opened USB")
+			return nil, nil
+		},
+	}
+	if err := run([]string{"set", "--model", "400-SKB081", "--slot", "6", "--key", "f13", "--dry-run"}, &bytes.Buffer{}, b); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestInferModelRejectsMismatchedSnapshot(t *testing.T) {
+	f, b := setup(t)
+	src := filepath.Join(t.TempDir(), "source.json")
+	if err := saveNew(src, makeSnapshot("400-MA214BK", f.records)); err != nil {
+		t.Fatal(err)
+	}
+	b.list = func() ([]device.Info, error) {
+		return []device.Info{{Model: "400-SKB081", Path: "keys", Slots: 6}}, nil
+	}
+	b.open = func(string, string, time.Duration) (connection, error) {
+		t.Fatal("opened mismatched snapshot target")
+		return nil, nil
+	}
+	if err := run([]string{"restore", "--from", src, "--backup", f.backup}, &bytes.Buffer{}, b); err == nil || !strings.Contains(err.Error(), "mismatch") {
+		t.Fatalf("expected snapshot mismatch: %v", err)
+	}
 }
 
 func (f *fakeDevice) ReadAll() ([][]byte, error) {
