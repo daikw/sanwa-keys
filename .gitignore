@@ -1,0 +1,4 @@
+/dist/
+/vendor/
+/coverage.out
+.DS_Store

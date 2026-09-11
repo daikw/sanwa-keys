@@ -1,0 +1,23 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [macos-14, ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libudev-dev
+      - run: make check build
+      - run: cp LICENSE dist/ && cp -R LICENSES dist/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sanwa-keys-${{ matrix.os }}
+          path: dist/
